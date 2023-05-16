@@ -1,0 +1,88 @@
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+app.use(express.json());
+
+const conexion = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'proyecto'
+});
+
+conexion.connect(function(error) {
+    if (error) {
+        throw error;
+    } else {
+        console.log("Conexión establecida correctamente.");
+    }
+});
+
+app.get('/api/proyecto', (req, res) => {
+    conexion.query('SELECT * FROM tipo_de_proyecto', (error, filas) => {
+        if (error) {
+            throw error;
+        } else {
+            res.send(filas);
+        }
+    });
+});
+
+app.post('/api/proyecto', (req,res)=>{
+    let data = {
+        id_proyecto:req.body.id_proyecto, 
+        nombre:req.body.nombre, 
+        descripción:req.body.descripción, 
+    };
+    let sql = "INSERT INTO tipo_de_proyecto ( id_proyecto, nombre, descripcion) VALUES (?, ?, ?)";
+    let values = [data.id_proyecto, data.nombre, data.descripcion];
+   
+
+    conexion.query(sql, values, function(error, filas){
+        if(error){
+            throw error;
+        }else{
+            res.send(filas);
+        }
+    });  
+});
+
+
+app.delete('/api/proyecto/:id_proyecto', (req, res) => {
+    const id_proyecto = req.params.id_proyecto;
+  
+    conexion.query('DELETE FROM cliente WHERE id_proyecto = ?', [id_proyecto], (error, results) => {
+      if (error) {
+        throw error;
+      } else {
+        res.send(results);
+      }
+    });
+  });
+
+
+  app.put('/api/proyecto/:id_proyecto', (req, res) => {
+    const id_proyecto = req.params.id_proyecto;
+    const { nombre, descripcion } = req.body;
+  
+    conexion.query(
+      'UPDATE proyecto SET nombre = ?, descrpcion = ? WHERE id_proyecto = ?',
+      [nombre, materia, descrpcion,  id_proyecto],
+      (error, results) => {
+        if (error) {
+          throw error;
+        } else {
+          res.send(results);
+        }
+      }
+    );
+  });
+
+
+
+
+    
+
+app.listen(3000, () => {
+    console.log('El servidor está funcionando en el puerto 3000');
+});

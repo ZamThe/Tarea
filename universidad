@@ -1,0 +1,90 @@
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+app.use(express.json());
+
+const conexion = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'proyecto'
+});
+
+conexion.connect(function(error) {
+    if (error) {
+        throw error;
+    } else {
+        console.log("Conexión establecida correctamente.");
+    }
+});
+
+app.get('/api/proyecto', (req, res) => {
+    conexion.query('SELECT * FROM universidad', (error, filas) => {
+        if (error) {
+            throw error;
+        } else {
+            res.send(filas);
+        }
+    });
+});
+
+app.post('/api/proyecto', (req,res)=>{
+    let data = {
+        universidad_id:req.body.universidad_id, 
+        nombre:req.body.nombre, 
+        direccion:req.body.direccion,
+        telefono:req.body.telefono,
+        correo:req.body.correo, 
+    };
+    let sql = "INSERT INTO universidad ( universidad_id, nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?, ?)";
+    let values = [data.universidad_id, data.nombre, data.direccion, data.telefono, data.correo];
+   
+
+    conexion.query(sql, values, function(error, filas){
+        if(error){
+            throw error;
+        }else{
+            res.send(filas);
+        }
+    });  
+});
+
+
+app.delete('/api/proyecto/:universidad_id', (req, res) => {
+    const universidad_id = req.params.universidad_id;
+  
+    conexion.query('DELETE FROM universidad WHERE universidad_id = ?', [universidad_id], (error, results) => {
+      if (error) {
+        throw error;
+      } else {
+        res.send(results);
+      }
+    });
+  });
+
+
+  app.put('/api/proyecto/:universidad_id', (req, res) => {
+    const universidad_id = req.params.universidad_id;
+    const { nombre, descripcion } = req.body;
+  
+    conexion.query(
+      'UPDATE proyecto SET nombre = ?, direccion = ?, telefono = ?, correo = ? WHERE universidad_id = ?',
+      [nombre, direccion, telefono, correo,  universidad_id],
+      (error, results) => {
+        if (error) {
+          throw error;
+        } else {
+          res.send(results);
+        }
+      }
+    );
+  });
+
+
+
+
+    
+
+app.listen(3000, () => {
+    console.log('El servidor está funcionando en el puerto 3000');
+});
